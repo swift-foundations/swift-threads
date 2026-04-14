@@ -12,7 +12,15 @@ let package = Package(
         .visionOS(.v26)
     ],
     products: [
+        // MARK: - Variants
+        .library(name: "Thread Synchronization", targets: ["Thread Synchronization"]),
+        .library(name: "Thread Barrier", targets: ["Thread Barrier"]),
+        .library(name: "Thread Gate", targets: ["Thread Gate"]),
+        .library(name: "Thread Semaphore", targets: ["Thread Semaphore"]),
+        .library(name: "Thread Worker", targets: ["Thread Worker"]),
         .library(name: "Thread Pool", targets: ["Thread Pool"]),
+        // MARK: - Umbrella
+        .library(name: "Threads", targets: ["Threads"]),
     ],
     dependencies: [
         .package(path: "../swift-kernel"),
@@ -21,12 +29,69 @@ let package = Package(
         .package(path: "../../swift-primitives/swift-algebra-primitives"),
     ],
     targets: [
+        // MARK: - Core coordination
+        .target(
+            name: "Thread Synchronization",
+            dependencies: [
+                .product(name: "Kernel", package: "swift-kernel"),
+            ]
+        ),
+
+        // MARK: - Coordination variants
+        .target(
+            name: "Thread Barrier",
+            dependencies: ["Thread Synchronization"]
+        ),
+        .target(
+            name: "Thread Gate",
+            dependencies: ["Thread Synchronization"]
+        ),
+        .target(
+            name: "Thread Semaphore",
+            dependencies: ["Thread Synchronization"]
+        ),
+        .target(
+            name: "Thread Worker",
+            dependencies: ["Thread Synchronization"]
+        ),
+
+        // MARK: - Dispatch
         .target(
             name: "Thread Pool",
             dependencies: [
                 .product(name: "Executors", package: "swift-executors"),
                 .product(name: "Async Semaphore Primitives", package: "swift-async-primitives"),
                 .product(name: "Algebra Primitives", package: "swift-algebra-primitives"),
+            ]
+        ),
+
+        // MARK: - Umbrella
+        .target(
+            name: "Threads",
+            dependencies: [
+                "Thread Synchronization",
+                "Thread Barrier",
+                "Thread Gate",
+                "Thread Semaphore",
+                "Thread Worker",
+                "Thread Pool",
+            ]
+        ),
+
+        // MARK: - Tests
+        .testTarget(
+            name: "Thread Synchronization Tests",
+            dependencies: [
+                "Thread Synchronization",
+                .product(name: "Kernel Test Support", package: "swift-kernel"),
+            ]
+        ),
+        .testTarget(
+            name: "Thread Semaphore Tests",
+            dependencies: [
+                "Thread Semaphore",
+                "Thread Gate",
+                .product(name: "Kernel Test Support", package: "swift-kernel"),
             ]
         ),
         .testTarget(
