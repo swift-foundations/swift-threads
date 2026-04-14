@@ -1,0 +1,62 @@
+# ========== CANONICAL (auto-synced, do not edit) ==========
+# Source: swift-institute/Scripts/sync-gitignore.sh
+
+*~
+.DS_Store
+
+Package.resolved
+DerivedData/
+Thumbs.db
+
+# Dot files/directories (opt-in only)
+/.*
+!/.github
+!/.gitignore
+!/.spi.yml
+!/.swift-format
+!/.swiftformat
+!/.swiftlint.yml
+!/.swiftlint/
+
+# Top-level entries (opt-in only)
+# First ignore all, then whitelist specific folders and files
+/*
+!/Sources/
+!/Tests/
+!/Experiments/
+!/Research/
+!/Skills/
+!/.github/
+!/Package.swift
+!/LICENSE.md
+!/README.md
+
+# Documentation (opt-in for whitelisted .md files and .docc catalogs only)
+# Blocks all .md files by default to prevent AI-generated content from being committed
+*.md
+!README.md
+!LICENSE.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+!CLAUDE.md
+!**/*.docc/**/*.md
+!**/Research/**/*.md
+!**/Experiments/**/*.md
+!**/Skills/**/*.md
+
+*.pdf
+
+# SwiftLint
+**/.swiftlint/RemoteConfigCache
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# ========== END CANONICAL ==========
+
+# ========== LOCAL OVERRIDES ==========
+# Package-specific rules below (managed by sync-gitignore.sh)
+
