@@ -15,6 +15,36 @@ extension Kernel.Thread {
     /// All threads wait at `arrive()` until the target count arrives,
     /// then all proceed together.
     ///
+    /// ## Safety Invariant
+    ///
+    /// This type is `Sendable` by virtue of internal synchronization: every access
+    /// to `_arrived`, `target`, `released`, and the shared condition variable is
+    /// serialized by `Kernel.Thread.SingleSync` (a single-condition
+    /// mutex+condvar wrapper). The caller MUST route every access through the
+    /// provided `arrive(timeout:)` / `arrived` API; reaching into the stored
+    /// state outside the mutex is undefined behaviour. The `@unsafe` annotation
+    /// makes this assertion explicit at the conformance site.
+    ///
+    /// ## Intended Use
+    ///
+    /// - Rendezvous coordination for a fixed team of threads (parallel
+    ///   benchmarks, phased computation, simulation steps).
+    /// - Cross-isolation transfer where producers and consumers need one-shot
+    ///   "everyone arrived" synchronization before proceeding together.
+    /// - Replacement for ad-hoc atomic counters + condvar plumbing at the
+    ///   kernel-thread layer.
+    ///
+    /// ## Non-Goals
+    ///
+    /// - Not a reusable barrier phaser. Once the target count is reached and
+    ///   `released` is set, the barrier stays released. Construct a new
+    ///   `Barrier` for each generation.
+    /// - Not lock-free. Every `arrive` pays for mutex acquisition; unsuitable
+    ///   for hot paths where atomic primitives suffice.
+    /// - Not a substitute for Swift `Task` group semantics. For async
+    ///   coordination use the structured-concurrency primitives; `Barrier`
+    ///   exists at the thread layer underneath.
+    ///
     /// ## Usage
     /// ```swift
     /// let barrier = Kernel.Thread.Barrier(count: 3)
@@ -23,11 +53,7 @@ extension Kernel.Thread {
     /// let success = barrier.arrive(timeout: .seconds(5))
     /// // All threads released simultaneously when 3rd arrives
     /// ```
-    ///
-    /// ## Thread Safety
-    /// Uses `@unchecked Sendable` because internal state is protected
-    /// by mutex synchronization.
-    public final class Barrier: @unchecked Sendable {
+    public final class Barrier: @unsafe @unchecked Sendable {
         private var _arrived: Int = 0
         private let target: Int
         private var released: Bool = false

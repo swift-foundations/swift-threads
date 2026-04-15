@@ -16,14 +16,30 @@ extension Kernel.Thread {
     /// the gate is opened. Once opened, the gate stays open permanently
     /// and all current and future waiters proceed immediately.
     ///
-    /// ## Pattern
-    /// - Waiters call `wait()` (blocks until gate opens)
-    /// - Signaler calls `open()` (releases all waiters)
+    /// ## Safety Invariant
     ///
-    /// ## One-Shot Semantics
-    /// A gate can only be opened once. After `open()`, the gate remains
-    /// open permanently. This is intentional - for reusable barriers,
-    /// use `Kernel.Thread.Barrier` instead.
+    /// This type is `Sendable` by virtue of internal synchronization: the
+    /// `_isOpen` flag and the associated condition variable live behind a
+    /// `Kernel.Thread.SingleSync` (mutex + condvar). Every transition --
+    /// opening the gate, checking `isOpen`, and waiting -- is serialized under
+    /// the mutex. The caller MUST drive all state transitions through the
+    /// documented `open()` / `wait()` / `wait(timeout:)` / `isOpen` API.
+    ///
+    /// ## Intended Use
+    ///
+    /// - One-shot "ready" signal between a setup thread and one or more
+    ///   consumer threads (e.g., pool warm-up, lazy initialization completion).
+    /// - Kernel-thread-layer rendezvous where a reusable barrier is overkill
+    ///   and the signal is monotonic (once open, stays open).
+    /// - Cross-isolation pattern: the signaler and the waiters live in
+    ///   different domains but both hold a reference to the same gate.
+    ///
+    /// ## Non-Goals
+    ///
+    /// - Not a reusable barrier. Once `open()` is called, the gate is latched
+    ///   permanently. For reusable synchronization use `Kernel.Thread.Barrier`.
+    /// - Not a lock-free primitive. Every operation pays for mutex acquisition.
+    /// - Not a one-to-one promise/future. Gates signal *state*, not values.
     ///
     /// ## Usage
     /// ```swift
@@ -31,16 +47,11 @@ extension Kernel.Thread {
     ///
     /// // Thread 1 (waiter)
     /// ready.wait()  // Blocks until opened
-    /// // ... proceed after gate opens
     ///
     /// // Thread 2 (signaler)
     /// ready.open()  // Releases all waiters
     /// ```
-    ///
-    /// ## Thread Safety
-    /// Uses `@unchecked Sendable` because internal state is protected
-    /// by mutex synchronization.
-    public final class Gate: @unchecked Sendable {
+    public final class Gate: @unsafe @unchecked Sendable {
         private var _isOpen: Bool = false
         private let sync = SingleSync()
 

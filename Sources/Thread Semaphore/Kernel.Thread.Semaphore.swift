@@ -17,6 +17,38 @@ extension Kernel.Thread {
     /// resource and release it when done. When no permits are available,
     /// acquiring threads block until a permit is released.
     ///
+    /// ## Safety Invariant
+    ///
+    /// This type is `Sendable` by virtue of internal synchronization: the entire
+    /// `_state` struct (permit counts, waiter counts, metrics, lifecycle) is
+    /// protected by `Kernel.Thread.DualSync` -- a single mutex paired with two
+    /// condition variables (`available` and `shutdown`). Every path -- acquire,
+    /// release, shutdown, wait, metrics snapshot -- serializes on the mutex and
+    /// signals/broadcasts the appropriate condition under the lock. The caller
+    /// MUST route every access through the documented public API; touching
+    /// `_state` outside the lock is undefined behaviour.
+    ///
+    /// ## Intended Use
+    ///
+    /// - Bounding concurrency over a shared resource at the kernel-thread
+    ///   layer (e.g., "no more than N in-flight requests", "at most K open
+    ///   file handles").
+    /// - Graceful shutdown with outstanding-permit draining via
+    ///   `shutdown.wait()`.
+    /// - Metrics-bearing coordination point where acquire/release/reject/
+    ///   timeout counters are observable.
+    ///
+    /// ## Non-Goals
+    ///
+    /// - Not an actor. Semaphore does not suspend Swift concurrency tasks;
+    ///   it blocks threads. For async permit acquisition use an actor or a
+    ///   Swift-concurrency-native primitive.
+    /// - Not a lock-free semaphore. Every acquire/release pays for mutex
+    ///   acquisition; the DualSync layout optimizes for condvar fan-out,
+    ///   not uncontended throughput.
+    /// - Not reentrant. A thread holding a permit and calling `acquire`
+    ///   again does not recursively succeed; it blocks.
+    ///
     /// ## Usage
     /// ```swift
     /// let semaphore = Kernel.Thread.Semaphore(capacity: 3)
@@ -30,11 +62,7 @@ extension Kernel.Thread {
     /// // Graceful shutdown
     /// semaphore.shutdown.wait()
     /// ```
-    ///
-    /// ## Thread Safety
-    /// Uses `@unchecked Sendable` because internal state is protected
-    /// by dual-condition mutex synchronization.
-    public final class Semaphore: @unchecked Sendable {
+    public final class Semaphore: @unsafe @unchecked Sendable {
         @usableFromInline
         let sync: Kernel.Thread.DualSync
 
