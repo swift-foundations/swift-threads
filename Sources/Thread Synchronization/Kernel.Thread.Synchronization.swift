@@ -18,9 +18,43 @@ extension Kernel.Thread {
     ///
     /// Uses `InlineArray` for zero-allocation fixed-size storage.
     ///
-    /// ## Safety
-    /// `@unchecked Sendable` because it provides internal synchronization.
-    /// All access to protected data must occur within `withLock` or while holding the lock.
+    /// ## Safety Invariant
+    ///
+    /// This type is `Sendable` by virtue of internal synchronization: every
+    /// access to the mutex-protected condition variables and waiter counts
+    /// is serialized by `Kernel.Thread.Mutex`. The caller MUST route every
+    /// access to protected state through `lock()` / `unlock()` / `withLock(_:)`,
+    /// and MUST NOT read or mutate `conditions` or `waiterCounts` outside the
+    /// lock. The `@unsafe` annotation makes this assertion explicit at the
+    /// conformance site — callers inherit the obligation to respect the lock.
+    ///
+    /// ## Intended Use
+    ///
+    /// Coordinating producers and consumers under a single mutex with one
+    /// or two associated condition variables. Typical consumers:
+    /// - Serial executor job queues (`Synchronization<1>`).
+    /// - Worker / deadline separation in the stealing executor
+    ///   (`Synchronization<2>`).
+    /// - Any small, bounded producer/consumer signalling where atomic-only
+    ///   primitives are insufficient and a condition variable wait is needed.
+    ///
+    /// Cross-isolation transfer is sound because every accessor serializes
+    /// through the mutex — moving the reference between threads does not
+    /// introduce a race that the mutex does not already mediate.
+    ///
+    /// ## Non-Goals
+    ///
+    /// - Not a lock-free primitive. Every operation pays for mutex acquisition.
+    ///   For high-contention hot paths where atomic primitives suffice, use
+    ///   those instead.
+    /// - Not a general "thread-safe object." This conformance does not make
+    ///   arbitrary concurrent access safe. Access to the protected condition
+    ///   variables and waiter counts MUST go through the documented
+    ///   `lock()` / `withLock(_:)` API; touching the stored state outside
+    ///   the lock is undefined behaviour.
+    /// - Not a replacement for a proper actor. When the coordination is
+    ///   naturally expressible via Swift concurrency, prefer an actor;
+    ///   `Synchronization` exists for the thread-level layer underneath.
     ///
     /// ## Usage
     /// ```swift
@@ -35,7 +69,7 @@ extension Kernel.Thread {
     /// // Signal condition 1 (deadline)
     /// sync.signal(condition: 1)
     /// ```
-    public final class Synchronization<let N: Int>: @unchecked Sendable {
+    public final class Synchronization<let N: Int>: @unsafe @unchecked Sendable {
         private let mutex = Kernel.Thread.Mutex()
         private var conditions: InlineArray<N, Kernel.Thread.Condition>
         private var waiterCounts: InlineArray<N, Int>
