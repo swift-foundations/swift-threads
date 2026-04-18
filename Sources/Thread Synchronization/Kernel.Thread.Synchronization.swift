@@ -119,22 +119,6 @@ extension Kernel.Thread.Synchronization {
         conditions[index].wait(mutex: mutex)
     }
 
-    /// Wait on the specified condition variable with timeout.
-    ///
-    /// Must be called while holding the lock.
-    /// The lock is released while waiting and reacquired before returning.
-    ///
-    /// - Parameters:
-    ///   - condition: Index of condition variable (0..<N).
-    ///   - nanoseconds: Timeout in nanoseconds. Values exceeding Int64.max are clamped.
-    /// - Returns: `true` if signaled, `false` if timed out.
-    /// - Precondition: Index must be in range 0..<N.
-    public func wait(condition index: Int = 0, timeout nanoseconds: UInt64) -> Bool {
-        precondition(index >= 0 && index < N, "Condition index \(index) out of bounds (0..<\(N))")
-        let clampedNanos = Int64(clamping: nanoseconds)
-        return conditions[index].wait(mutex: mutex, timeout: .nanoseconds(clampedNanos))
-    }
-
     /// Wait on the specified condition variable with Duration timeout.
     ///
     /// Must be called while holding the lock.

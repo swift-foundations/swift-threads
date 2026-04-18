@@ -40,11 +40,6 @@ extension Kernel.Thread.Synchronization.Channel {
         sync.wait(condition: index)
     }
 
-    /// Wait on this condition with timeout.
-    public func wait(timeout nanoseconds: UInt64) -> Bool {
-        sync.wait(condition: index, timeout: nanoseconds)
-    }
-
     /// Wait on this condition with Duration timeout.
     public func wait(timeout: Duration) -> Bool {
         sync.wait(condition: index, timeout: timeout)
