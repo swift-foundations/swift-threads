@@ -20,13 +20,13 @@ extension Kernel.Thread.Pool {
 // MARK: - Unit Tests
 
 extension Kernel.Thread.Pool.Test.Unit {
-    @Test("shared pool exists")
-    func sharedExists() {
+    @Test
+    func `shared pool exists`() {
         _ = Kernel.Thread.Pool.shared
     }
 
-    @Test("custom pool with options")
-    func customOptions() {
+    @Test
+    func `custom pool with options`() {
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(2), admissionLimit: 8))
         pool.shutdown()
     }
@@ -35,8 +35,8 @@ extension Kernel.Thread.Pool.Test.Unit {
 // MARK: - Edge Case Tests
 
 extension Kernel.Thread.Pool.Test.EdgeCase {
-    @Test("shutdown rejects new work")
-    func shutdownRejects() async {
+    @Test
+    func `shutdown rejects new work`() async {
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(1), admissionLimit: 4))
         pool.shutdown()
 
@@ -48,8 +48,8 @@ extension Kernel.Thread.Pool.Test.EdgeCase {
         }
     }
 
-    @Test("throwing operation propagates as .right")
-    func throwingPropagates() async {
+    @Test
+    func `throwing operation propagates as .right`() async {
         struct TestError: Swift.Error, Sendable, Equatable {}
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(1), admissionLimit: 4))
         defer { pool.shutdown() }
@@ -69,8 +69,8 @@ extension Kernel.Thread.Pool.Test.EdgeCase {
 // MARK: - Integration Tests
 
 extension Kernel.Thread.Pool.Test.Integration {
-    @Test("run completes and returns value")
-    func runReturnsValue() async throws {
+    @Test
+    func `run completes and returns value`() async throws {
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(2), admissionLimit: 8))
         defer { pool.shutdown() }
 
@@ -78,8 +78,8 @@ extension Kernel.Thread.Pool.Test.Integration {
         #expect(result == 42)
     }
 
-    @Test("multiple runs complete independently")
-    func multipleRuns() async throws {
+    @Test
+    func `multiple runs complete independently`() async throws {
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(2), admissionLimit: 8))
         defer { pool.shutdown() }
 
@@ -91,8 +91,8 @@ extension Kernel.Thread.Pool.Test.Integration {
         #expect(r3 == 3)
     }
 
-    @Test("non-Sendable return via async run")
-    func nonSendableReturn() async throws {
+    @Test
+    func `non-Sendable return via async run`() async throws {
         final class Box { var value: Int; init(_ v: Int) { self.value = v } }
         let pool = Kernel.Thread.Pool(.init(workers: try! .init(1), admissionLimit: 4))
         defer { pool.shutdown() }

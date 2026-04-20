@@ -33,16 +33,16 @@ extension SynchronizationWaiterTrackingTests {
 }
 
 extension SynchronizationWaiterTrackingTests.Unit {
-    @Test("waiters starts at zero")
-    func waitersStartsAtZero() {
+    @Test
+    func `waiters starts at zero`() {
         let sync = Kernel.Thread.SingleSync()
         sync.lock()
         #expect(sync.waiters(condition: 0) == 0)
         sync.unlock()
     }
 
-    @Test("signalIfWaiters returns false when no waiters")
-    func signalIfWaitersReturnsFalseWhenEmpty() {
+    @Test
+    func `signalIfWaiters returns false when no waiters`() {
         let sync = Kernel.Thread.SingleSync()
         sync.lock()
         let result = sync.signalIfWaiters(condition: 0)
@@ -50,8 +50,8 @@ extension SynchronizationWaiterTrackingTests.Unit {
         #expect(result == false)
     }
 
-    @Test("broadcastIfWaiters returns false when no waiters")
-    func broadcastIfWaitersReturnsFalseWhenEmpty() {
+    @Test
+    func `broadcastIfWaiters returns false when no waiters`() {
         let sync = Kernel.Thread.SingleSync()
         sync.lock()
         let result = sync.broadcastIfWaiters(condition: 0)
@@ -59,8 +59,8 @@ extension SynchronizationWaiterTrackingTests.Unit {
         #expect(result == false)
     }
 
-    @Test("DualSync Channel waiters starts at zero")
-    func conditionAccessorWaiterCountStartsAtZero() {
+    @Test
+    func `DualSync Channel waiters starts at zero`() {
         let sync = Kernel.Thread.DualSync()
         sync.lock()
         #expect(sync.worker.waiters == 0)
@@ -68,8 +68,8 @@ extension SynchronizationWaiterTrackingTests.Unit {
         sync.unlock()
     }
 
-    @Test("DualSync Channel signalIfWaiters returns false when empty")
-    func conditionAccessorSignalIfWaitersReturnsFalse() {
+    @Test
+    func `DualSync Channel signalIfWaiters returns false when empty`() {
         let sync = Kernel.Thread.DualSync()
         sync.lock()
         #expect(sync.worker.signalIfWaiters() == false)
@@ -77,8 +77,8 @@ extension SynchronizationWaiterTrackingTests.Unit {
         sync.unlock()
     }
 
-    @Test("DualSync Channel broadcastIfWaiters returns false when empty")
-    func conditionAccessorBroadcastIfWaitersReturnsFalse() {
+    @Test
+    func `DualSync Channel broadcastIfWaiters returns false when empty`() {
         let sync = Kernel.Thread.DualSync()
         sync.lock()
         #expect(sync.worker.broadcastIfWaiters() == false)
@@ -104,8 +104,8 @@ private func smallSleep(milliseconds: UInt32) {
 }
 
 extension SynchronizationWaiterTrackingTests.Integration {
-    @Test("waitTracked increments waiters")
-    func waitTrackedIncrementsCount() throws {
+    @Test
+    func `waitTracked increments waiters`() throws {
         let sync = Kernel.Thread.SingleSync()
         let waiterReady = Atomic<Bool>(false)
         let shouldWake = Atomic<Bool>(false)
@@ -140,8 +140,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(count == 1)
     }
 
-    @Test("waitTracked decrements waiters after wakeup")
-    func waitTrackedDecrementsAfterWakeup() throws {
+    @Test
+    func `waitTracked decrements waiters after wakeup`() throws {
         let sync = Kernel.Thread.SingleSync()
         let threadDone = Atomic<Bool>(false)
 
@@ -164,8 +164,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(threadDone.load(ordering: .acquiring) == true)
     }
 
-    @Test("signalIfWaiters returns true and wakes one waiter")
-    func signalIfWaitersWakesOneWaiter() throws {
+    @Test
+    func `signalIfWaiters returns true and wakes one waiter`() throws {
         let sync = Kernel.Thread.SingleSync()
         let waiterReady = Atomic<Bool>(false)
         let waiterWoken = Atomic<Bool>(false)
@@ -195,8 +195,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(waiterWoken.load(ordering: .acquiring) == true)
     }
 
-    @Test("broadcastIfWaiters returns true and wakes all waiters")
-    func broadcastIfWaitersWakesAllWaiters() throws {
+    @Test
+    func `broadcastIfWaiters returns true and wakes all waiters`() throws {
         let sync = Kernel.Thread.SingleSync()
         let waitersReady = Atomic<Int>(0)
         let waitersWoken = Atomic<Int>(0)
@@ -246,8 +246,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(waitersWoken.load(ordering: .acquiring) == numWaiters)
     }
 
-    @Test("timeout waitTracked still decrements count")
-    func timeoutWaitTrackedDecrementsCount() throws {
+    @Test
+    func `timeout waitTracked still decrements count`() throws {
         let sync = Kernel.Thread.SingleSync()
         let timedOut = Atomic<Bool>(false)
 
@@ -268,8 +268,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(timedOut.load(ordering: .acquiring) == true)
     }
 
-    @Test("mixed wait and waitTracked - broadcast still wakes tracked waiters")
-    func mixedModeProgressGuarantee() throws {
+    @Test
+    func `mixed wait and waitTracked - broadcast still wakes tracked waiters`() throws {
         let sync = Kernel.Thread.SingleSync()
         let trackedReady = Atomic<Bool>(false)
         let trackedWoken = Atomic<Bool>(false)
@@ -300,8 +300,8 @@ extension SynchronizationWaiterTrackingTests.Integration {
         #expect(trackedWoken.load(ordering: .acquiring) == true)
     }
 
-    @Test("DualSync Channel waitTracked works")
-    func conditionAccessorWaitTrackedWorks() throws {
+    @Test
+    func `DualSync Channel waitTracked works`() throws {
         let sync = Kernel.Thread.DualSync()
         let waiterReady = Atomic<Bool>(false)
         let waiterWoken = Atomic<Bool>(false)

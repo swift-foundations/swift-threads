@@ -20,8 +20,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Unit")
     struct Unit {
 
-        @Test("acquire succeeds when capacity available")
-        func acquireSucceeds() throws {
+        @Test
+        func `acquire succeeds when capacity available`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 2)
 
             let result = try semaphore.run { 42 }
@@ -31,8 +31,8 @@ struct KernelThreadSemaphoreTests {
             #expect(semaphore.metrics.releases == 1)
         }
 
-        @Test("multiple acquires within capacity")
-        func multipleAcquires() throws {
+        @Test
+        func `multiple acquires within capacity`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 3)
 
             let gate1 = Kernel.Thread.Gate()
@@ -71,8 +71,8 @@ struct KernelThreadSemaphoreTests {
             t3.join()
         }
 
-        @Test("permit conservation")
-        func permitConservation() throws {
+        @Test
+        func `permit conservation`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 5)
 
             for _ in 0..<100 {
@@ -85,8 +85,8 @@ struct KernelThreadSemaphoreTests {
             #expect(m.releases == 100)
         }
 
-        @Test("throwing body returns Result")
-        func throwingBodyReturnsResult() throws {
+        @Test
+        func `throwing body returns Result`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
 
             struct TestError: Swift.Error {}
@@ -107,8 +107,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Blocking")
     struct Blocking {
 
-        @Test("acquire blocks when exhausted then succeeds on release")
-        func acquireBlocksAndSucceeds() throws {
+        @Test
+        func `acquire blocks when exhausted then succeeds on release`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let firstAcquired = Kernel.Thread.Gate()
             let allowRelease = Kernel.Thread.Gate()
@@ -147,8 +147,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Timeout")
     struct Timeout {
 
-        @Test("timeout returns nil after duration")
-        func timeoutReturnsNil() throws {
+        @Test
+        func `timeout returns nil after duration`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let holding = Kernel.Thread.Gate()
             let released = Kernel.Thread.Gate()
@@ -172,8 +172,8 @@ struct KernelThreadSemaphoreTests {
             t1.join()
         }
 
-        @Test("acquisition succeeds if permit available at deadline")
-        func acquisitionSucceedsAtDeadline() throws {
+        @Test
+        func `acquisition succeeds if permit available at deadline`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
 
             let timeout = semaphore.run.timeout(.milliseconds(100))
@@ -186,8 +186,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Shutdown")
     struct Shutdown {
 
-        @Test("shutdown rejects new runs")
-        func shutdownRejectsNewRuns() throws {
+        @Test
+        func `shutdown rejects new runs`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
 
             semaphore.shutdown()
@@ -199,8 +199,8 @@ struct KernelThreadSemaphoreTests {
             #expect(semaphore.metrics.rejected == 1)
         }
 
-        @Test("shutdown.wait returns when outstanding reaches zero")
-        func shutdownWaitReturns() throws {
+        @Test
+        func `shutdown.wait returns when outstanding reaches zero`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let acquired = Kernel.Thread.Gate()
             let canRelease = Kernel.Thread.Gate()
@@ -230,8 +230,8 @@ struct KernelThreadSemaphoreTests {
             t2.join()
         }
 
-        @Test("shutdown wakes blocked waiters")
-        func shutdownWakesWaiters() throws {
+        @Test
+        func `shutdown wakes blocked waiters`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let acquired = Kernel.Thread.Gate()
             let waiterDone = Kernel.Thread.Gate()
@@ -277,8 +277,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Cancellation")
     struct Cancellation {
 
-        @Test("cancellation while waiting returns cancelled")
-        func cancellationWhileWaiting() throws {
+        @Test
+        func `cancellation while waiting returns cancelled`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let token = Kernel.Thread.Semaphore.Cancellation()
             let acquired = Kernel.Thread.Gate()
@@ -323,8 +323,8 @@ struct KernelThreadSemaphoreTests {
             t2.join()
         }
 
-        @Test("cancellation after body returns cancelled")
-        func cancellationAfterBody() throws {
+        @Test
+        func `cancellation after body returns cancelled`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let token = Kernel.Thread.Semaphore.Cancellation()
 
@@ -338,8 +338,8 @@ struct KernelThreadSemaphoreTests {
             }
         }
 
-        @Test("shutdown dominates cancellation")
-        func shutdownDominatesCancellation() throws {
+        @Test
+        func `shutdown dominates cancellation`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 1)
             let token = Kernel.Thread.Semaphore.Cancellation()
             let acquired = Kernel.Thread.Gate()
@@ -388,8 +388,8 @@ struct KernelThreadSemaphoreTests {
     @Suite("Metrics")
     struct MetricsSuite {
 
-        @Test("metrics track acquisitions and releases")
-        func metricsTrackAcquisitionsReleases() throws {
+        @Test
+        func `metrics track acquisitions and releases`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 3)
 
             for _ in 0..<10 {
@@ -403,8 +403,8 @@ struct KernelThreadSemaphoreTests {
             #expect(m.available == 3)
         }
 
-        @Test("peak tracks maximum outstanding")
-        func peakTracksMaximum() throws {
+        @Test
+        func `peak tracks maximum outstanding`() throws {
             let semaphore = Kernel.Thread.Semaphore(capacity: 3)
             let gate1 = Kernel.Thread.Gate()
             let gate2 = Kernel.Thread.Gate()
