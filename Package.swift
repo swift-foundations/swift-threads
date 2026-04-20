@@ -19,6 +19,7 @@ let package = Package(
         .library(name: "Thread Semaphore", targets: ["Thread Semaphore"]),
         .library(name: "Thread Worker", targets: ["Thread Worker"]),
         .library(name: "Thread Pool", targets: ["Thread Pool"]),
+        .library(name: "Thread Actor", targets: ["Thread Actor"]),
         // MARK: - Umbrella
         .library(name: "Threads", targets: ["Threads"]),
     ],
@@ -64,6 +65,12 @@ let package = Package(
                 .product(name: "Algebra Primitives", package: "swift-algebra-primitives"),
             ]
         ),
+        .target(
+            name: "Thread Actor",
+            dependencies: [
+                .product(name: "Executors", package: "swift-executors"),
+            ]
+        ),
 
         // MARK: - Umbrella
         .target(
@@ -75,6 +82,7 @@ let package = Package(
                 "Thread Semaphore",
                 "Thread Worker",
                 "Thread Pool",
+                "Thread Actor",
             ]
         ),
 
