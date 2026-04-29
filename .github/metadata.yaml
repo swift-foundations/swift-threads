@@ -1,0 +1,7 @@
+# .github/metadata.yaml
+# Triaged by AI-assisted bulk pass (2026-04-29).
+description: "Thread-layer compositions for Swift."
+topics:
+  - foundations
+  - threads
+homepage: "https://swift-institute.org"
