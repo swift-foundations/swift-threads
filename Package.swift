@@ -27,7 +27,7 @@ let package = Package(
         .package(path: "../swift-kernel"),
         .package(path: "../swift-executors"),
         .package(path: "../../swift-primitives/swift-async-primitives"),
-        .package(path: "../../swift-primitives/swift-algebra-primitives"),
+        .package(path: "../../swift-primitives/swift-either-primitives"),
     ],
     targets: [
         // MARK: - Core coordination
@@ -62,7 +62,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Executors", package: "swift-executors"),
                 .product(name: "Async Semaphore Primitives", package: "swift-async-primitives"),
-                .product(name: "Algebra Primitives", package: "swift-algebra-primitives"),
+                .product(name: "Either Primitives", package: "swift-either-primitives"),
             ]
         ),
         .target(

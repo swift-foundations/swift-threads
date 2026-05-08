@@ -4,7 +4,7 @@
 //
 
 internal import Async_Semaphore_Primitives
-public import Algebra_Primitives
+public import Either_Primitives
 
 extension Kernel.Thread.Pool {
     /// Execute a non-throwing operation on a dedicated worker thread.
