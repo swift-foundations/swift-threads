@@ -13,7 +13,6 @@ let package = Package(
     ],
     products: [
         // MARK: - Variants
-        .library(name: "Thread Synchronization", targets: ["Thread Synchronization"]),
         .library(name: "Thread Barrier", targets: ["Thread Barrier"]),
         .library(name: "Thread Gate", targets: ["Thread Gate"]),
         .library(name: "Thread Semaphore", targets: ["Thread Semaphore"]),
@@ -26,34 +25,35 @@ let package = Package(
     dependencies: [
         .package(path: "../swift-kernel"),
         .package(path: "../swift-executors"),
+        .package(path: "../swift-synchronizers"),
         .package(path: "../../swift-primitives/swift-async-primitives"),
         .package(path: "../../swift-primitives/swift-either-primitives"),
     ],
     targets: [
-        // MARK: - Core coordination
-        .target(
-            name: "Thread Synchronization",
-            dependencies: [
-                .product(name: "Kernel", package: "swift-kernel"),
-            ]
-        ),
-
         // MARK: - Coordination variants
         .target(
             name: "Thread Barrier",
-            dependencies: ["Thread Synchronization"]
+            dependencies: [
+                .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
+            ]
         ),
         .target(
             name: "Thread Gate",
-            dependencies: ["Thread Synchronization"]
+            dependencies: [
+                .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
+            ]
         ),
         .target(
             name: "Thread Semaphore",
-            dependencies: ["Thread Synchronization"]
+            dependencies: [
+                .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
+            ]
         ),
         .target(
             name: "Thread Worker",
-            dependencies: ["Thread Synchronization"]
+            dependencies: [
+                .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
+            ]
         ),
 
         // MARK: - Dispatch
@@ -76,7 +76,6 @@ let package = Package(
         .target(
             name: "Threads",
             dependencies: [
-                "Thread Synchronization",
                 "Thread Barrier",
                 "Thread Gate",
                 "Thread Semaphore",
@@ -87,13 +86,6 @@ let package = Package(
         ),
 
         // MARK: - Tests
-        .testTarget(
-            name: "Thread Synchronization Tests",
-            dependencies: [
-                "Thread Synchronization",
-                .product(name: "Kernel Test Support", package: "swift-kernel"),
-            ]
-        ),
         .testTarget(
             name: "Thread Semaphore Tests",
             dependencies: [

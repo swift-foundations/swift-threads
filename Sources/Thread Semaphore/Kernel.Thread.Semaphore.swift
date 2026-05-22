@@ -21,7 +21,7 @@ extension Kernel.Thread {
     ///
     /// This type is `Sendable` by virtue of internal synchronization: the entire
     /// `_state` struct (permit counts, waiter counts, metrics, lifecycle) is
-    /// protected by `Kernel.Thread.DualSync` -- a single mutex paired with two
+    /// protected by `Synchronizer.Blocking<2>` -- a single mutex paired with two
     /// condition variables (`available` and `shutdown`). Every path -- acquire,
     /// release, shutdown, wait, metrics snapshot -- serializes on the mutex and
     /// signals/broadcasts the appropriate condition under the lock. The caller
@@ -44,7 +44,7 @@ extension Kernel.Thread {
     ///   it blocks threads. For async permit acquisition use an actor or a
     ///   Swift-concurrency-native primitive.
     /// - Not a lock-free semaphore. Every acquire/release pays for mutex
-    ///   acquisition; the DualSync layout optimizes for condvar fan-out,
+    ///   acquisition; the dual-condvar layout optimizes for condvar fan-out,
     ///   not uncontended throughput.
     /// - Not reentrant. A thread holding a permit and calling `acquire`
     ///   again does not recursively succeed; it blocks.
@@ -64,7 +64,7 @@ extension Kernel.Thread {
     /// ```
     public final class Semaphore: @unsafe @unchecked Sendable {
         @usableFromInline
-        let sync: Kernel.Thread.DualSync
+        let sync: Synchronizer.Blocking<2>
 
         @usableFromInline
         var _state: State
@@ -79,7 +79,7 @@ extension Kernel.Thread {
         public init(capacity: Int) {
             precondition(capacity >= 1, "Semaphore capacity must be at least 1")
             self.capacity = capacity
-            self.sync = Kernel.Thread.DualSync()
+            self.sync = Synchronizer.Blocking<2>()
             self._state = State(capacity: capacity)
         }
     }
@@ -191,7 +191,7 @@ extension Kernel.Thread.Semaphore {
 extension Kernel.Thread.Semaphore {
     @usableFromInline
     func _release() {
-        let effect: Effect = sync.withLock {
+        let effect: Effect = sync.synchronize {
             _state.outstanding -= 1
             _state.available += 1
             _state.metrics.releases += 1
@@ -213,7 +213,7 @@ extension Kernel.Thread.Semaphore {
 extension Kernel.Thread.Semaphore {
     @usableFromInline
     func _shutdown() {
-        let effect: Effect = sync.withLock {
+        let effect: Effect = sync.synchronize {
             guard _state.lifecycle == .open else {
                 return .none
             }

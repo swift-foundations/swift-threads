@@ -1,1 +1,1 @@
-@_exported public import Thread_Synchronization
+@_exported public import Synchronizer_Blocking

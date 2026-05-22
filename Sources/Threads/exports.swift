@@ -1,4 +1,4 @@
-@_exported public import Thread_Synchronization
+@_exported public import Synchronizer_Blocking
 @_exported public import Thread_Barrier
 @_exported public import Thread_Gate
 @_exported public import Thread_Semaphore

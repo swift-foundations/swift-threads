@@ -19,7 +19,7 @@ extension Kernel.Thread {
     ///
     /// This type is `Sendable` by virtue of internal synchronization: every access
     /// to `_arrived`, `target`, `released`, and the shared condition variable is
-    /// serialized by `Kernel.Thread.SingleSync` (a single-condition
+    /// serialized by `Synchronizer.Blocking<1>` (a single-condition
     /// mutex+condvar wrapper). The caller MUST route every access through the
     /// provided `arrive(timeout:)` / `arrived` API; reaching into the stored
     /// state outside the mutex is undefined behaviour. The `@unsafe` annotation
@@ -57,7 +57,7 @@ extension Kernel.Thread {
         private var _arrived: Int = 0
         private let target: Int
         private var released: Bool = false
-        private let sync = SingleSync()
+        private let sync = Synchronizer.Blocking<1>()
 
         /// Creates a barrier with the given target count.
         ///
@@ -101,6 +101,6 @@ extension Kernel.Thread.Barrier {
 
     /// Current count of threads that have arrived.
     public var arrived: Int {
-        sync.withLock { _arrived }
+        sync.synchronize { _arrived }
     }
 }

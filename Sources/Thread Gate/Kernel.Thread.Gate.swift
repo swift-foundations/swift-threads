@@ -20,7 +20,7 @@ extension Kernel.Thread {
     ///
     /// This type is `Sendable` by virtue of internal synchronization: the
     /// `_isOpen` flag and the associated condition variable live behind a
-    /// `Kernel.Thread.SingleSync` (mutex + condvar). Every transition --
+    /// `Synchronizer.Blocking<1>` (mutex + condvar). Every transition --
     /// opening the gate, checking `isOpen`, and waiting -- is serialized under
     /// the mutex. The caller MUST drive all state transitions through the
     /// documented `open()` / `wait()` / `wait(timeout:)` / `isOpen` API.
@@ -53,7 +53,7 @@ extension Kernel.Thread {
     /// ```
     public final class Gate: @unsafe @unchecked Sendable {
         private var _isOpen: Bool = false
-        private let sync = SingleSync()
+        private let sync = Synchronizer.Blocking<1>()
 
         /// Creates a new closed gate.
         public init() {}
@@ -69,7 +69,7 @@ extension Kernel.Thread.Gate {
     ///
     /// Opening an already-open gate is a no-op.
     public func open() {
-        let didOpen = sync.withLock {
+        let didOpen = sync.synchronize {
             guard !_isOpen else { return false }
             _isOpen = true
             return true
@@ -110,6 +110,6 @@ extension Kernel.Thread.Gate {
     ///
     /// This is a non-blocking check.
     public var isOpen: Bool {
-        sync.withLock { _isOpen }
+        sync.synchronize { _isOpen }
     }
 }

@@ -20,16 +20,16 @@ Thread-layer compositions for Swift. Houses composed types that build on `Kernel
 |---------|----------|
 | `Thread Pool` | `Kernel.Thread.Pool` — admission-gated closure dispatch over `Kernel.Thread.Executor.Sharded` |
 
-Phase B (follow-up) will add:
-
 | Product | Contents |
 |---------|----------|
-| `Thread Synchronization` | `Kernel.Thread.Synchronization<N>`, `DualSync`, `SingleSync` |
-| `Thread Barrier` | `Kernel.Thread.Barrier` |
-| `Thread Gate` | `Kernel.Thread.Gate` |
-| `Thread Semaphore` | `Kernel.Thread.Semaphore` (thread-blocking, distinct from `Async.Semaphore`) |
+| `Thread Barrier` | `Kernel.Thread.Barrier` (rendezvous coordination over `Synchronizer.Blocking<1>`) |
+| `Thread Gate` | `Kernel.Thread.Gate` (one-shot rendezvous over `Synchronizer.Blocking<1>`) |
+| `Thread Semaphore` | `Kernel.Thread.Semaphore` (thread-blocking counting semaphore over `Synchronizer.Blocking<2>`; distinct from `Async.Semaphore`) |
 | `Thread Worker` | `Kernel.Thread.Worker` + `Token` |
+| `Thread Actor` | `Kernel.Thread.Actor` (executor-backed actor) |
 | `Threads` | umbrella re-exporting all of the above |
+
+The underlying synchronization substrate (`Synchronizer.Blocking<N>` — mutex + N condvars) lives in the sibling [`swift-synchronizers`](../swift-synchronizers) L3 package. swift-threads consumes it directly via the `Synchronizer Blocking` product.
 
 ---
 
@@ -52,7 +52,7 @@ Phase B (follow-up) will add:
 )
 ```
 
-Consumers should prefer narrow product imports — `Thread Pool`, `Thread Synchronization`, etc. — over the umbrella `Threads` unless they genuinely need the full stack.
+Consumers should prefer narrow product imports — `Thread Pool`, `Thread Semaphore`, etc. — over the umbrella `Threads` unless they genuinely need the full stack.
 
 ### Requirements
 
