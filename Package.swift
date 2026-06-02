@@ -23,11 +23,11 @@ let package = Package(
         .library(name: "Threads", targets: ["Threads"]),
     ],
     dependencies: [
-        .package(path: "../swift-kernel"),
-        .package(path: "../swift-executors"),
-        .package(path: "../swift-synchronizers"),
-        .package(path: "../../swift-primitives/swift-async-primitives"),
-        .package(path: "../../swift-primitives/swift-either-primitives"),
+        .package(url: "https://github.com/swift-foundations/swift-kernel.git", branch: "main"),
+        .package(url: "https://github.com/swift-foundations/swift-executors.git", branch: "main"),
+        .package(url: "https://github.com/swift-foundations/swift-synchronizers.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-async-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-either-primitives.git", branch: "main"),
     ],
     targets: [
         // MARK: - Coordination variants
