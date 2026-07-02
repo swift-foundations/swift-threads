@@ -1,6 +1,6 @@
 # .github/metadata.yaml
 # Triaged by AI-assisted bulk pass (2026-04-29).
-description: "Thread-layer compositions for Swift."
+description: "Admission-gated thread pools, barriers, gates, semaphores, workers, and executor-backed actors for Swift."
 topics:
   - foundations
   - threads
