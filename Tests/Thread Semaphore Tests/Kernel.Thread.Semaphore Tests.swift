@@ -9,10 +9,10 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
 import Kernel
-import Thread_Semaphore
+import Testing
 import Thread_Gate
+import Thread_Semaphore
 
 @Suite("Kernel.Thread.Semaphore")
 struct KernelThreadSemaphoreTests {
@@ -76,7 +76,7 @@ struct KernelThreadSemaphoreTests {
             let semaphore = Kernel.Thread.Semaphore(capacity: 5)
 
             for _ in 0..<100 {
-                _ = try semaphore.run { }
+                _ = try semaphore.run {}
             }
 
             let m = semaphore.metrics
@@ -98,6 +98,7 @@ struct KernelThreadSemaphoreTests {
             switch result {
             case .success:
                 Issue.record("Expected failure")
+
             case .failure:
                 break
             }
@@ -251,7 +252,7 @@ struct KernelThreadSemaphoreTests {
 
             let t2 = try Kernel.Thread.spawn {
                 do {
-                    _ = try semaphore.run { }
+                    _ = try semaphore.run {}
                 } catch Kernel.Thread.Semaphore.Error.shutdown {
                     box.gotShutdown = true
                 } catch {
@@ -300,7 +301,7 @@ struct KernelThreadSemaphoreTests {
             let t2 = try Kernel.Thread.spawn {
                 do {
                     let cancellable = semaphore.run.cancellable(token).poll(.milliseconds(5))
-                    _ = try cancellable { }
+                    _ = try cancellable {}
                 } catch Kernel.Thread.Semaphore.Error.cancelled {
                     box.gotCancelled = true
                 } catch {
@@ -361,7 +362,7 @@ struct KernelThreadSemaphoreTests {
             let t2 = try Kernel.Thread.spawn {
                 do {
                     let cancellable = semaphore.run.cancellable(token).poll(.milliseconds(5))
-                    _ = try cancellable { }
+                    _ = try cancellable {}
                 } catch let e as Kernel.Thread.Semaphore.Error {
                     box.error = e
                 } catch {
@@ -393,7 +394,7 @@ struct KernelThreadSemaphoreTests {
             let semaphore = Kernel.Thread.Semaphore(capacity: 3)
 
             for _ in 0..<10 {
-                _ = try semaphore.run { }
+                _ = try semaphore.run {}
             }
 
             let m = semaphore.metrics

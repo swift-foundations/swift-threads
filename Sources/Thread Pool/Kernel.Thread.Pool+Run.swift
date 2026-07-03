@@ -14,10 +14,11 @@ extension Kernel.Thread.Pool {
     /// 3. Returns the result via continuation's `sending` semantics —
     ///    no `T: Sendable` requirement.
     nonisolated(nonsending)
-    public func run<T>(
-        timeout: Duration? = nil,
-        _ operation: sending @escaping () -> T
-    ) async throws(Kernel.Thread.Pool.Error) -> sending T {
+        public func run<T>(
+            timeout: Duration? = nil,
+            _ operation: sending @escaping () -> T
+        ) async throws(Self.Error) -> sending T
+    {
         do throws(Async.Semaphore.Error) {
             if let timeout {
                 try await admission.wait(timeout: timeout)
@@ -25,7 +26,7 @@ extension Kernel.Thread.Pool {
                 try await admission.wait()
             }
         } catch {
-            throw Kernel.Thread.Pool.Error(from: error)
+            throw Self.Error(from: error)
         }
 
         defer { admission.signal() }
@@ -44,10 +45,11 @@ extension Kernel.Thread.Pool {
     /// The outer `Either<Pool.Error, E>` distinguishes admission failures
     /// (cancelled/timeout/shutdown) from operation failures.
     nonisolated(nonsending)
-    public func run<T, E: Swift.Error>(
-        timeout: Duration? = nil,
-        _ operation: sending @escaping () throws(E) -> T
-    ) async throws(Either<Kernel.Thread.Pool.Error, E>) -> sending T {
+        public func run<T, E: Swift.Error>(
+            timeout: Duration? = nil,
+            _ operation: sending @escaping () throws(E) -> T
+        ) async throws(Either<Kernel.Thread.Pool.Error, E>) -> sending T
+    {
         do throws(Async.Semaphore.Error) {
             if let timeout {
                 try await admission.wait(timeout: timeout)
@@ -55,7 +57,7 @@ extension Kernel.Thread.Pool {
                 try await admission.wait()
             }
         } catch {
-            throw .left(Kernel.Thread.Pool.Error(from: error))
+            throw .left(Self.Error(from: error))
         }
 
         defer { admission.signal() }

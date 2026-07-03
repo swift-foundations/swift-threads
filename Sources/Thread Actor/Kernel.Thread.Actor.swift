@@ -97,7 +97,7 @@ extension Kernel.Thread {
         /// Per Swift's actor model, the runtime reads this accessor
         /// when scheduling isolated work on the actor and when
         /// consumer actors forward their own `unownedExecutor`.
-        public nonisolated var unownedExecutor: UnownedSerialExecutor {
+        nonisolated public var unownedExecutor: UnownedSerialExecutor {
             unsafe executor.asUnownedSerialExecutor()
         }
     }

@@ -198,11 +198,10 @@ extension Kernel.Thread.Semaphore {
             _state.metrics.outstanding = _state.outstanding
             _state.metrics.available = _state.available
 
-            if _state.lifecycle == .open {
-                return .signal(.available)
-            } else {
+            guard _state.lifecycle == .open else {
                 return _close()
             }
+            return .signal(.available)
         }
         perform(effect)
     }
@@ -219,12 +218,11 @@ extension Kernel.Thread.Semaphore {
             }
             _state.lifecycle = .closing
 
-            if _state.outstanding == 0 {
-                _state.lifecycle = .closed
-                return .broadcast(.shutdown)
-            } else {
+            guard _state.outstanding == 0 else {
                 return .broadcast(.available)
             }
+            _state.lifecycle = .closed
+            return .broadcast(.shutdown)
         }
         perform(effect)
     }
@@ -252,7 +250,8 @@ extension Kernel.Thread.Semaphore {
     @usableFromInline
     func _close() -> Effect {
         guard _state.lifecycle == .closing,
-              _state.outstanding == 0 else {
+            _state.outstanding == 0
+        else {
             return .none
         }
         _state.lifecycle = .closed
@@ -268,8 +267,10 @@ extension Kernel.Thread.Semaphore {
         switch effect {
         case .none:
             return
+
         case .signal(let condition):
             sync.signal(condition: condition.rawValue)
+
         case .broadcast(let condition):
             sync.broadcast(condition: condition.rawValue)
         }
