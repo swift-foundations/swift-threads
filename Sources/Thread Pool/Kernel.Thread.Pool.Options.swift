@@ -6,12 +6,15 @@
 extension Kernel.Thread.Pool {
     /// Configuration for the thread pool.
     public struct Options: Sendable {
-        /// Number of worker threads. If nil, Sharded defaults to processor count.
+        /// Number of worker threads.
+        ///
+        /// If nil, Sharded defaults to processor count.
         public var workers: Kernel.Thread.Count?
 
         /// Maximum concurrent in-flight operations.
         public var admissionLimit: Int
 
+        /// Creates pool options with the given worker count and admission limit.
         public init(
             workers: Kernel.Thread.Count? = nil,
             admissionLimit: Int = 256

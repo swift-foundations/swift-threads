@@ -37,7 +37,9 @@ extension Kernel.Thread.Semaphore {
 }
 
 extension Kernel.Thread.Semaphore.Shutdown {
-    /// Initiates shutdown. New acquisitions will throw `.shutdown`.
+    /// Initiates shutdown.
+    ///
+    /// New acquisitions will throw `.shutdown`.
     ///
     /// Outstanding permits continue to be held until released.
     /// Blocked waiters are woken and will receive `.shutdown`.

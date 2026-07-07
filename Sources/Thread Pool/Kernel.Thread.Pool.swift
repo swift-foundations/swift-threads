@@ -29,6 +29,7 @@ extension Kernel.Thread {
         let executors: Kernel.Thread.Executor.Sharded
         let admission: Async.Semaphore
 
+        /// Creates a thread pool with the given options.
         public init(_ options: Options = .init()) {
             self.executors = Kernel.Thread.Executor.Sharded(.init(count: options.workers))
             self.admission = Async.Semaphore(capacity: options.admissionLimit)

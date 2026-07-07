@@ -54,7 +54,7 @@ extension Kernel.Thread {
         /// The stop token shared with the running thread.
         private let token: Token
 
-        /// Creates a worker (private - use factory `start`)
+        /// Creates a worker (private - use factory `start`).
         private init(handle: consuming Handle, token: Token) {
             self.handle = handle
             self.token = token
