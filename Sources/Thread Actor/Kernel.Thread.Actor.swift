@@ -90,15 +90,18 @@ extension Kernel.Thread {
         public init(executor: Kernel.Thread.Executor) {
             self.executor = executor
         }
+    }
+}
 
-        /// The executor as an `UnownedSerialExecutor`, for actor
-        /// isolation and TCA26 co-location.
-        ///
-        /// Per Swift's actor model, the runtime reads this accessor
-        /// when scheduling isolated work on the actor and when
-        /// consumer actors forward their own `unownedExecutor`.
-        nonisolated public var unownedExecutor: UnownedSerialExecutor {
-            unsafe executor.asUnownedSerialExecutor()
-        }
+extension Kernel.Thread.Actor {
+
+    /// The executor as an `UnownedSerialExecutor`, for actor
+    /// isolation and TCA26 co-location.
+    ///
+    /// Per Swift's actor model, the runtime reads this accessor
+    /// when scheduling isolated work on the actor and when
+    /// consumer actors forward their own `unownedExecutor`.
+    nonisolated public var unownedExecutor: UnownedSerialExecutor {
+        unsafe executor.asUnownedSerialExecutor()
     }
 }

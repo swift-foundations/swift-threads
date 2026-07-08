@@ -66,7 +66,7 @@ extension Kernel.Thread.Semaphore.Run {
     ) throws(Kernel.Thread.Semaphore.Error) -> Result<T, E> {
         try semaphore._acquire()
         defer { semaphore._release() }
-        do {
+        do throws(E) {
             return .success(try body())
         } catch {
             return .failure(error)
