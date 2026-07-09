@@ -11,7 +11,7 @@ import Testing
 extension Kernel.Thread.Pool {
     enum Test {
         @Suite struct Unit {}
-        @Suite struct EdgeCase {}
+        @Suite struct `Edge Case` {}
         @Suite struct Integration {}
         @Suite(.serialized) struct Performance {}
     }
@@ -34,7 +34,7 @@ extension Kernel.Thread.Pool.Test.Unit {
 
 // MARK: - Edge Case Tests
 
-extension Kernel.Thread.Pool.Test.EdgeCase {
+extension Kernel.Thread.Pool.Test.`Edge Case` {
     @Test
     func `shutdown rejects new work`() async throws {
         let pool = Kernel.Thread.Pool(.init(workers: try .init(1), admissionLimit: 4))
