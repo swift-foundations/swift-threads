@@ -40,7 +40,7 @@ extension Kernel.Thread.Pool.Test.EdgeCase {
         let pool = Kernel.Thread.Pool(.init(workers: try .init(1), admissionLimit: 4))
         pool.shutdown()
 
-        do {
+        do throws(Kernel.Thread.Pool.Error) {
             _ = try await pool.run { 1 }
             Issue.record("Expected shutdown error")
         } catch {
@@ -54,7 +54,7 @@ extension Kernel.Thread.Pool.Test.EdgeCase {
         let pool = Kernel.Thread.Pool(.init(workers: try .init(1), admissionLimit: 4))
         defer { pool.shutdown() }
 
-        do {
+        do throws(Either<Kernel.Thread.Pool.Error, TestError>) {
             _ = try await pool.run { () throws(TestError) -> Int in throw TestError() }
             Issue.record("Expected error")
         } catch {
