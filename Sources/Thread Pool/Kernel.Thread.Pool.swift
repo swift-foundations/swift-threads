@@ -28,11 +28,13 @@ extension Kernel.Thread {
     public struct Pool: Sendable {
         let executors: Kernel.Thread.Executor.Sharded
         let admission: Async.Semaphore
+        let inFlight: Kernel.Thread.Pool.InFlight
 
         /// Creates a thread pool with the given options.
         public init(_ options: Options = .init()) {
             self.executors = Kernel.Thread.Executor.Sharded(.init(count: options.workers))
             self.admission = Async.Semaphore(capacity: options.admissionLimit)
+            self.inFlight = Kernel.Thread.Pool.InFlight()
         }
     }
 }
@@ -51,10 +53,19 @@ extension Kernel.Thread.Pool {
 extension Kernel.Thread.Pool {
     /// Shut down, rejecting new work.
     ///
-    /// Shuts down the admission semaphore (wakes waiters with `.shutdown`)
-    /// and shuts down the executor pool (joins OS threads).
+    /// 1. Shuts down the admission semaphore — new and currently-suspended
+    ///    `run` calls are rejected with `.shutdown` from this point on.
+    /// 2. Blocks until every `run` call that was already admitted (or was
+    ///    still attempting admission when shutdown began) has completed —
+    ///    draining in-flight work before any executor thread is joined.
+    /// 3. Shuts down the executor pool (joins OS threads).
+    ///
+    /// This ordering guarantees no admitted run can still be pending
+    /// dispatch to a shard at the moment its executor is torn down, so
+    /// `shutdown()` never returns while admitted work is outstanding.
     public func shutdown() {
         admission.shutdown()
+        inFlight.waitUntilIdle()
         executors.shutdown()
     }
 }

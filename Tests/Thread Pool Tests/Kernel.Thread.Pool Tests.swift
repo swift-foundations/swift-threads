@@ -5,6 +5,7 @@
 
 import Kernel_Test_Support
 import Testing
+import Thread_Gate
 
 @testable import Thread_Pool
 
@@ -63,6 +64,36 @@ extension Kernel.Thread.Pool.Test.`Edge Case` {
             case .right(let e): #expect(e == TestError())
             }
         }
+    }
+
+    // F-004: shutdown() must drain admitted in-flight work before joining
+    // executor threads, rather than proceeding as soon as the admission
+    // semaphore is shut down. This exercises `shutdown()`'s real code path
+    // (including its `inFlight.waitUntilIdle()` call) while controlling
+    // timing deterministically via direct `inFlight.enter()/leave()` calls
+    // — the same calls `run(...)` makes internally — instead of racing
+    // against OS thread scheduling.
+    @Test
+    func `shutdown blocks until admitted in-flight work drains before joining executors`() async throws {
+        let pool = Kernel.Thread.Pool(.init(workers: try .init(1), admissionLimit: 1))
+        let shutdownFinished = Kernel.Thread.Gate()
+
+        // Simulate a `run` call that has been admitted (or is still
+        // attempting admission) and has not yet completed.
+        pool.inFlight.enter()
+
+        Task.detached {
+            pool.shutdown()
+            shutdownFinished.open()
+        }
+
+        // If shutdown() does not drain in-flight work, it returns almost
+        // immediately — well before we ever release the simulated run.
+        #expect(shutdownFinished.wait(timeout: .milliseconds(200)) == false)
+
+        pool.inFlight.leave()
+
+        #expect(shutdownFinished.wait(timeout: .seconds(5)) == true)
     }
 }
 

@@ -19,6 +19,9 @@ extension Kernel.Thread.Pool {
             _ operation: sending @escaping () -> T
         ) async throws(Self.Error) -> sending T
     {
+        inFlight.enter()
+        defer { inFlight.leave() }
+
         do throws(Async.Semaphore.Error) {
             if let timeout {
                 try await admission.wait(timeout: timeout)
@@ -50,6 +53,9 @@ extension Kernel.Thread.Pool {
             _ operation: sending @escaping () throws(E) -> T
         ) async throws(Either<Kernel.Thread.Pool.Error, E>) -> sending T
     {
+        inFlight.enter()
+        defer { inFlight.leave() }
+
         do throws(Async.Semaphore.Error) {
             if let timeout {
                 try await admission.wait(timeout: timeout)

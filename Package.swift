@@ -63,6 +63,7 @@ let package = Package(
                 .product(name: "Executors", package: "swift-executors"),
                 .product(name: "Async Semaphore Primitives", package: "swift-async-primitives"),
                 .product(name: "Either Primitives", package: "swift-either-primitives"),
+                .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
             ]
         ),
         .target(
@@ -98,6 +99,7 @@ let package = Package(
             name: "Thread Pool Tests",
             dependencies: [
                 "Thread Pool",
+                "Thread Gate",
                 .product(name: "Kernel Test Support", package: "swift-kernel"),
             ]
         ),
