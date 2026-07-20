@@ -16,11 +16,11 @@ import Thread_Semaphore
 
 extension Kernel.Thread.Semaphore {
 
-    @Suite("Kernel.Thread.Semaphore")
+    @Suite
     struct Test {
 
-        @Suite("Unit")
-        struct Unit {
+        @Suite
+        struct `Unit` {
 
             @Test
             func `acquire succeeds when capacity available`() throws {
@@ -107,8 +107,8 @@ extension Kernel.Thread.Semaphore {
             }
         }
 
-        @Suite("Blocking")
-        struct Blocking {
+        @Suite
+        struct `Blocking` {
 
             @Test
             func `acquire blocks when exhausted then succeeds on release`() throws {
@@ -147,8 +147,8 @@ extension Kernel.Thread.Semaphore {
             }
         }
 
-        @Suite("Timeout")
-        struct Timeout {
+        @Suite
+        struct `Timeout` {
 
             @Test
             func `timeout returns nil after duration`() throws {
@@ -186,8 +186,8 @@ extension Kernel.Thread.Semaphore {
             }
         }
 
-        @Suite("Shutdown")
-        struct Shutdown {
+        @Suite
+        struct `Shutdown` {
 
             @Test
             func `shutdown rejects new runs`() throws {
@@ -277,8 +277,8 @@ extension Kernel.Thread.Semaphore {
             }
         }
 
-        @Suite("Cancellation")
-        struct Cancellation {
+        @Suite
+        struct `Cancellation` {
 
             @Test
             func `cancellation while waiting returns cancelled`() throws {
@@ -388,8 +388,8 @@ extension Kernel.Thread.Semaphore {
             }
         }
 
-        @Suite("Metrics")
-        struct Metrics {
+        @Suite
+        struct `Metrics` {
 
             @Test
             func `metrics track acquisitions and releases`() throws {
