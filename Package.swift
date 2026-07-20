@@ -100,6 +100,7 @@ let package = Package(
             dependencies: [
                 "Thread Pool",
                 "Thread Gate",
+                .product(name: "Async Semaphore Primitives", package: "swift-async-primitives"),
                 .product(name: "Kernel Test Support", package: "swift-kernel"),
             ]
         ),
