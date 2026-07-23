@@ -27,7 +27,9 @@ let package = Package(
         .package(url: "https://github.com/swift-foundations/swift-executors.git", branch: "main"),
         .package(url: "https://github.com/swift-foundations/swift-synchronizers.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-async-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-cardinal-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-either-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-ownership-primitives.git", branch: "main"),
     ],
     targets: [
         // MARK: - Coordination variants
@@ -62,7 +64,15 @@ let package = Package(
             dependencies: [
                 .product(name: "Executors", package: "swift-executors"),
                 .product(name: "Async Semaphore Primitives", package: "swift-async-primitives"),
+                .product(name: "Cardinal Add Primitives", package: "swift-cardinal-primitives"),
+                .product(name: "Cardinal Carrier Primitives", package: "swift-cardinal-primitives"),
+                .product(name: "Cardinal Primitive", package: "swift-cardinal-primitives"),
+                .product(
+                    name: "Cardinal Primitives Standard Library Integration",
+                    package: "swift-cardinal-primitives"
+                ),
                 .product(name: "Either Primitives", package: "swift-either-primitives"),
+                .product(name: "Ownership Latch Primitives", package: "swift-ownership-primitives"),
                 .product(name: "Synchronizer Blocking", package: "swift-synchronizers"),
             ]
         ),

@@ -1,71 +1,52 @@
 //
 //  Kernel.Thread.Pool.swift
-//  swift-executors
+//  swift-threads
 //
 
 internal import Async_Semaphore_Primitives
+internal import Cardinal_Add_Primitives
+internal import Cardinal_Primitives_Standard_Library_Integration
 
 extension Kernel.Thread {
-    /// Admission-gated thread pool for dispatching arbitrary closures to
-    /// dedicated OS threads.
-    ///
-    /// Composes two building blocks:
-    /// - `Kernel.Thread.Executor.Sharded` — round-robin dispatch across N
-    ///   worker executors
-    /// - `Async.Semaphore` — async-suspending admission gate that bounds the
-    ///   number of concurrent in-flight operations
-    ///
-    /// ## Usage
-    /// ```swift
-    /// let pool = Kernel.Thread.Pool()
-    /// defer { pool.shutdown() }
-    /// let result = try await pool.run { blockingSyscall() }
-    /// ```
-    ///
-    /// Consumers who need raw executor access (e.g. for actor pinning or
-    /// `Task(executorPreference:)`) should use `Kernel.Thread.Executor.Sharded`
-    /// directly.
+    /// Admission-gated pool for dispatching arbitrary closures to dedicated OS threads.
     public struct Pool: Sendable {
         let executors: Kernel.Thread.Executor.Sharded
         let admission: Async.Semaphore
-        let inFlight: Kernel.Thread.Pool.InFlight
+        let lifecycle: Kernel.Thread.Pool.Lifecycle
 
         /// Creates a thread pool with the given options.
+        ///
+        /// - Parameter options: The worker, admission, and queue bounds.
         public init(_ options: Options = .init()) {
+            let admitted = Int(clamping: options.admitted)
+            let maximum = Int(clamping: options.admitted.add.saturating(options.queued))
             self.executors = Kernel.Thread.Executor.Sharded(.init(count: options.workers))
-            self.admission = Async.Semaphore(capacity: options.admissionLimit)
-            self.inFlight = Kernel.Thread.Pool.InFlight()
+            self.admission = Async.Semaphore(capacity: admitted)
+            self.lifecycle = Kernel.Thread.Pool.Lifecycle(maximum: maximum)
         }
     }
 }
 
-// MARK: - Shared
-
 extension Kernel.Thread.Pool {
     /// Process-scoped shared instance.
     ///
-    /// Lazily initialized, no shutdown required — lives for the process lifetime.
+    /// The process owner may share this bounded pool. Consumers must not shut
+    /// it down.
     public static let shared: Kernel.Thread.Pool = .init()
 }
 
-// MARK: - Shutdown
-
 extension Kernel.Thread.Pool {
-    /// Shut down, rejecting new work.
+    /// Shuts down the pool after draining all accepted work.
     ///
-    /// 1. Shuts down the admission semaphore — new and currently-suspended
-    ///    `run` calls are rejected with `.shutdown` from this point on.
-    /// 2. Blocks until every `run` call that was already admitted (or was
-    ///    still attempting admission when shutdown began) has completed —
-    ///    draining in-flight work before any executor thread is joined.
-    /// 3. Shuts down the executor pool (joins OS threads).
-    ///
-    /// This ordering guarantees no admitted run can still be pending
-    /// dispatch to a shard at the moment its executor is torn down, so
-    /// `shutdown()` never returns while admitted work is outstanding.
+    /// New reservations and queued admission waiters are rejected. Logical
+    /// requesters for admitted work resume with shutdown while workers retain
+    /// physical ownership until their operations finish. This method drains
+    /// those finite workers before joining their threads.
     public func shutdown() {
+        let deliveries = lifecycle.close()
         admission.shutdown()
-        inFlight.waitUntilIdle()
+        deliveries.forEach { $0.resume(returning: .shutdown) }
+        lifecycle.wait()
         executors.shutdown()
     }
 }

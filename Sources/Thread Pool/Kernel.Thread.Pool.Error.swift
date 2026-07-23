@@ -1,17 +1,20 @@
 //
 //  Kernel.Thread.Pool.Error.swift
-//  swift-executors
+//  swift-threads
 //
 
 internal import Async_Semaphore_Primitives
 
 extension Kernel.Thread.Pool {
-    /// Errors thrown by pool admission.
+    /// Errors thrown by pool admission and logical delivery.
     public enum Error: Swift.Error, Sendable, Equatable {
-        /// The task was cancelled before admission.
+        /// The bounded pool has no remaining reservation capacity.
+        case capacity
+
+        /// The task was cancelled.
         case cancelled
 
-        /// The deadline expired before admission.
+        /// The total operation budget expired.
         case timeout
 
         /// The pool has been shut down.
@@ -19,11 +22,9 @@ extension Kernel.Thread.Pool {
     }
 }
 
-// MARK: - Conversion from Semaphore Error
-
 extension Kernel.Thread.Pool.Error {
-    init(from semaphoreError: Async.Semaphore.Error) {
-        switch semaphoreError {
+    init(from error: Async.Semaphore.Error) {
+        switch error {
         case .cancelled: self = .cancelled
         case .timeout: self = .timeout
         case .shutdown: self = .shutdown
