@@ -73,6 +73,7 @@ extension Kernel.Thread.Pool.Test.Unit {
             switch error {
             case .left:
                 Issue.record("Expected operation error")
+
             case .right(let failure):
                 #expect(failure == Kernel.Thread.Pool.Test.Failure())
             }
@@ -463,9 +464,7 @@ extension Kernel.Thread.Pool.Test.Integration {
     }
 
     @Test
-    func `throwing run transfers a move-only success`() async throws(
-        Either<Kernel.Thread.Pool.Error, Kernel.Thread.Pool.Test.Failure>
-    ) {
+    func `throwing run transfers a move-only success`() async throws(Either<Kernel.Thread.Pool.Error, Kernel.Thread.Pool.Test.Failure>) {
         let pool = Kernel.Thread.Pool(.init(workers: .init(1)))
         let census = KernelThreadTest.Harness(0)
 

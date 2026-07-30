@@ -209,6 +209,7 @@ extension Kernel.Thread.Pool {
         switch consume outcome {
         case .success(let result):
             return result
+
         case .failure(let error):
             throw .right(error)
         }
