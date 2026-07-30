@@ -68,9 +68,9 @@ extension Kernel.Thread.Semaphore {
                 #expect(semaphore.metrics.outstanding == 3)
 
                 releaseGate.open()
-                t1.join()
-                t2.join()
-                t3.join()
+                try t1.join()
+                try t2.join()
+                try t3.join()
             }
 
             @Test
@@ -142,8 +142,8 @@ extension Kernel.Thread.Semaphore {
                 #expect(secondAcquired.wait(timeout: .seconds(1)))
                 #expect(semaphore.metrics.acquisitions == 2)
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
             }
         }
 
@@ -172,7 +172,7 @@ extension Kernel.Thread.Semaphore {
                 #expect(semaphore.metrics.timeouts == 1)
 
                 released.open()
-                t1.join()
+                try t1.join()
             }
 
             @Test
@@ -229,8 +229,8 @@ extension Kernel.Thread.Semaphore {
 
                 #expect(shutdownComplete.wait(timeout: .seconds(1)))
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
             }
 
             @Test
@@ -272,8 +272,8 @@ extension Kernel.Thread.Semaphore {
 
                 holdingRelease.open()
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
             }
         }
 
@@ -322,8 +322,8 @@ extension Kernel.Thread.Semaphore {
 
                 holdingRelease.open()
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
             }
 
             @Test
@@ -383,8 +383,8 @@ extension Kernel.Thread.Semaphore {
 
                 holdingRelease.open()
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
             }
         }
 
@@ -433,8 +433,8 @@ extension Kernel.Thread.Semaphore {
 
                 release.open()
 
-                t1.join()
-                t2.join()
+                try t1.join()
+                try t2.join()
 
                 #expect(semaphore.metrics.peak >= 2)
             }

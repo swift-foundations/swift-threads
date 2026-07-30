@@ -45,7 +45,7 @@ extension Kernel.Thread {
     ///
     /// // Later, signal stop and join
     /// worker.stop()
-    /// consume worker.join()
+    /// try consume worker.join()
     /// ```
     public struct Worker: ~Copyable, Sendable {
         /// The thread handle, consumed exactly once on join.
@@ -83,7 +83,7 @@ extension Kernel.Thread.Worker {
     ///     }
     /// }
     /// worker.stop()
-    /// consume worker.join()
+    /// try consume worker.join()
     /// ```
     ///
     /// - Parameter body: Work to run on the thread. Receives a stop token.
@@ -128,11 +128,12 @@ extension Kernel.Thread.Worker {
     ///
     /// - Precondition: Must NOT be called from the worker's own thread (deadlock).
     /// - Note: Must be called exactly once. The `~Copyable` constraint enforces this.
-    public consuming func join() {
+    /// - Throws: `Kernel.Thread.Error` if the underlying `pthread_join` reports a failure.
+    public consuming func join() throws(Kernel.Thread.Error) {
         precondition(
             handle.isCurrent == false,
             "Kernel.Thread.Worker.join() called from the worker's own thread - this would deadlock"
         )
-        handle.join()
+        try handle.join()
     }
 }
