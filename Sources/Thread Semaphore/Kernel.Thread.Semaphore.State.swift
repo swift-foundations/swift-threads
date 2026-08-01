@@ -28,4 +28,3 @@ extension Kernel.Thread.Semaphore {
         }
     }
 }
-
