@@ -113,7 +113,7 @@ extension Kernel.Thread.Worker {
     ///
     /// This is idempotent - calling multiple times is safe.
     public func stop() {
-        token.requestStop()
+        token.stop()
     }
 
     /// Check if stop has been requested.

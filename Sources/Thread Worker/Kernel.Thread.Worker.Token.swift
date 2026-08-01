@@ -43,7 +43,7 @@ extension Kernel.Thread.Worker.Token {
     }
 
     /// Request the worker to stop (internal - use Worker.stop()).
-    func requestStop() {
+    func stop() {
         stopped.store(true, ordering: .releasing)
     }
 }

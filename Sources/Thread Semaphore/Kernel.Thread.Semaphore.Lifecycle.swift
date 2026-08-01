@@ -10,22 +10,16 @@
 // ===----------------------------------------------------------------------===//
 
 extension Kernel.Thread.Semaphore {
+    /// Three-state lifecycle for graceful shutdown.
     @usableFromInline
-    struct State: Sendable {
-        var available: Int
-        var outstanding: Int
-        var waiters: Int
-        var lifecycle: Lifecycle
-        var metrics: Metrics
+    enum Lifecycle: Sendable, Equatable {
+        /// Normal operation — permits may be acquired.
+        case open
 
-        init(capacity: Int) {
-            self.available = capacity
-            self.outstanding = 0
-            self.waiters = 0
-            self.lifecycle = .open
-            self.metrics = Metrics()
-            self.metrics.available = capacity
-        }
+        /// Draining outstanding permits — no new acquisitions.
+        case closing
+
+        /// Fully shut down.
+        case closed
     }
 }
-

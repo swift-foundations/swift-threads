@@ -53,7 +53,7 @@ extension Kernel.Thread {
     /// let success = barrier.arrive(timeout: .seconds(5))
     /// // All threads released simultaneously when 3rd arrives
     /// ```
-    public final class Barrier: @unsafe @unchecked Sendable {
+    public final class Barrier: @unchecked Sendable {
         private var _arrived: Int = 0
         private let target: Int
         private var released: Bool = false

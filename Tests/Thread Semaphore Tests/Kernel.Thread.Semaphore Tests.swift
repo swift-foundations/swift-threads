@@ -43,21 +43,33 @@ extension Kernel.Thread.Semaphore {
                 let releaseGate = Kernel.Thread.Gate()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         gate1.open()
                         releaseGate.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
                 let t2 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         gate2.open()
                         releaseGate.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
                 let t3 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         gate3.open()
                         releaseGate.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
@@ -91,10 +103,10 @@ extension Kernel.Thread.Semaphore {
             func `throwing body returns Result`() throws {
                 let semaphore = Kernel.Thread.Semaphore(capacity: 1)
 
-                struct TestError: Swift.Error {}
+                struct Fault: Swift.Error {}
 
-                let result: Result<Int, TestError> = try semaphore.run { () throws(TestError) -> Int in
-                    throw TestError()
+                let result: Result<Int, Fault> = try semaphore.run { () throws(Fault) -> Int in
+                    throw Fault()
                 }
 
                 switch result {
@@ -118,9 +130,13 @@ extension Kernel.Thread.Semaphore {
                 let secondAcquired = Kernel.Thread.Gate()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         firstAcquired.open()
                         allowRelease.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
@@ -129,8 +145,12 @@ extension Kernel.Thread.Semaphore {
                 #expect(semaphore.metrics.available == 0)
 
                 let t2 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         secondAcquired.open()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
@@ -157,9 +177,13 @@ extension Kernel.Thread.Semaphore {
                 let released = Kernel.Thread.Gate()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         holding.open()
                         released.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
@@ -210,9 +234,13 @@ extension Kernel.Thread.Semaphore {
                 let shutdownComplete = Kernel.Thread.Gate()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         acquired.open()
                         canRelease.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
@@ -240,23 +268,27 @@ extension Kernel.Thread.Semaphore {
                 let waiterDone = Kernel.Thread.Gate()
                 let holdingRelease = Kernel.Thread.Gate()
 
-                final class Box: @unchecked Sendable { var gotShutdown = false }
+                final class Box: @unchecked Sendable { var caught = false }
                 let box = Box()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         acquired.open()
                         holdingRelease.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
                 acquired.wait()
 
                 let t2 = try Kernel.Thread.spawn {
-                    do {
+                    do throws(Kernel.Thread.Semaphore.Error) {
                         _ = try semaphore.run {}
-                    } catch Kernel.Thread.Semaphore.Error.shutdown {
-                        box.gotShutdown = true
+                    } catch .shutdown {
+                        box.caught = true
                     } catch {
                         // Other error
                     }
@@ -268,7 +300,7 @@ extension Kernel.Thread.Semaphore {
                 semaphore.shutdown()
 
                 #expect(waiterDone.wait(timeout: .seconds(1)))
-                #expect(box.gotShutdown)
+                #expect(box.caught)
 
                 holdingRelease.open()
 
@@ -288,24 +320,28 @@ extension Kernel.Thread.Semaphore {
                 let waiterDone = Kernel.Thread.Gate()
                 let holdingRelease = Kernel.Thread.Gate()
 
-                final class Box: @unchecked Sendable { var gotCancelled = false }
+                final class Box: @unchecked Sendable { var caught = false }
                 let box = Box()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         acquired.open()
                         holdingRelease.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
                 acquired.wait()
 
                 let t2 = try Kernel.Thread.spawn {
-                    do {
+                    do throws(Kernel.Thread.Semaphore.Error) {
                         let cancellable = semaphore.run.cancellable(token).poll(.milliseconds(5))
                         _ = try cancellable {}
-                    } catch Kernel.Thread.Semaphore.Error.cancelled {
-                        box.gotCancelled = true
+                    } catch .cancelled {
+                        box.caught = true
                     } catch {
                         // Other error
                     }
@@ -317,7 +353,7 @@ extension Kernel.Thread.Semaphore {
                 token.cancel()
 
                 #expect(waiterDone.wait(timeout: .seconds(1)))
-                #expect(box.gotCancelled)
+                #expect(box.caught)
                 #expect(semaphore.metrics.cancellations == 1)
 
                 holdingRelease.open()
@@ -353,22 +389,24 @@ extension Kernel.Thread.Semaphore {
                 let box = Box()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         acquired.open()
                         holdingRelease.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 
                 acquired.wait()
 
                 let t2 = try Kernel.Thread.spawn {
-                    do {
+                    do throws(Kernel.Thread.Semaphore.Error) {
                         let cancellable = semaphore.run.cancellable(token).poll(.milliseconds(5))
                         _ = try cancellable {}
-                    } catch let e as Kernel.Thread.Semaphore.Error {
-                        box.error = e
                     } catch {
-                        // Other error
+                        box.error = error
                     }
                     waiterDone.open()
                 }
@@ -414,15 +452,23 @@ extension Kernel.Thread.Semaphore {
                 let release = Kernel.Thread.Gate()
 
                 let t1 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         gate1.open()
                         release.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
                 let t2 = try Kernel.Thread.spawn {
-                    _ = try? semaphore.run {
+                    do throws(Kernel.Thread.Semaphore.Error) {
+                        _ = try semaphore.run {
                         gate2.open()
                         release.wait()
+                        }
+                    } catch {
+                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
                     }
                 }
 

@@ -62,7 +62,7 @@ extension Kernel.Thread {
     /// // Graceful shutdown
     /// semaphore.shutdown.wait()
     /// ```
-    public final class Semaphore: @unsafe @unchecked Sendable {
+    public final class Semaphore: @unchecked Sendable {
         @usableFromInline
         let sync: Synchronizer.Blocking<2>
 
@@ -269,9 +269,13 @@ extension Kernel.Thread.Semaphore {
             return
 
         case .signal(let condition):
+            // swift-linter:disable:next raw value access
+            // REASON: same-package implementation access converting the typed Condition case to its Synchronizer.Blocking condition index.
             sync.signal(condition: condition.rawValue)
 
         case .broadcast(let condition):
+            // swift-linter:disable:next raw value access
+            // REASON: same-package implementation access converting the typed Condition case to its Synchronizer.Blocking condition index.
             sync.broadcast(condition: condition.rawValue)
         }
     }

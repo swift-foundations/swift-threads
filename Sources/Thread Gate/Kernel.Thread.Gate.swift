@@ -51,7 +51,7 @@ extension Kernel.Thread {
     /// // Thread 2 (signaler)
     /// ready.open()  // Releases all waiters
     /// ```
-    public final class Gate: @unsafe @unchecked Sendable {
+    public final class Gate: @unchecked Sendable {
         private var _isOpen: Bool = false
         private let sync = Synchronizer.Blocking<1>()
 
