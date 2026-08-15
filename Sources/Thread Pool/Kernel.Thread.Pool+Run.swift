@@ -29,7 +29,7 @@ extension Kernel.Thread.Pool {
         try lifecycle.reserve()
         let result = Ownership.Latch<T>()
         let work = Ownership.Latch(operation)
-        let timer = Ownership.Latch<Task<Void, any Swift.Error>>()
+        let timer = Ownership.Latch<Task<Void, Never>>()
         let dispatch = Ownership.Latch<Task<Void, Never>>()
         let id = ObjectIdentifier(result)
 
@@ -130,7 +130,7 @@ extension Kernel.Thread.Pool {
         }
         let outcome = Ownership.Latch<Kernel.Thread.Pool.Outcome<T, E>>()
         let work = Ownership.Latch(operation)
-        let timer = Ownership.Latch<Task<Void, any Swift.Error>>()
+        let timer = Ownership.Latch<Task<Void, Never>>()
         let dispatch = Ownership.Latch<Task<Void, Never>>()
         let id = ObjectIdentifier(outcome)
 
@@ -223,9 +223,13 @@ extension Kernel.Thread.Pool {
     private func deadline(
         after remaining: Duration,
         for id: ObjectIdentifier
-    ) -> Task<Void, any Swift.Error> {
+    ) -> Task<Void, Never> {
         Task.detached { [lifecycle] in
-            try await Task.sleep(for: remaining)
+            do {
+                try await Task.sleep(for: remaining)
+            } catch {
+                return
+            }
             lifecycle.resolve(id)?.resume(returning: .timeout)
         }
     }
