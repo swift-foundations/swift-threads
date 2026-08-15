@@ -20,7 +20,8 @@ extension Kernel.Thread.Pool {
         private let maximum: Int
         private var open = true
         private var count = 0
-        private var deliveries: [ObjectIdentifier: CheckedContinuation<Kernel.Thread.Pool.Error?, Never>] = [:]
+        private var deliveries:
+            [ObjectIdentifier: CheckedContinuation<Kernel.Thread.Pool.Error?, Never>] = [:]
 
         init(maximum: Int) {
             self.maximum = maximum
