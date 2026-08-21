@@ -1,24 +1,9 @@
-//
-//  Kernel.Thread.Pool+Run.swift
-//  swift-threads
-//
-
 internal import Async_Semaphore_Primitives
 public import Either_Primitives
 internal import Ownership_Latch_Primitives
 
 extension Kernel.Thread.Pool {
-    /// Executes a non-throwing operation on a dedicated worker thread.
-    ///
-    /// - Parameters:
-    ///   - timeout: The total budget for admission and execution.
-    ///   - operation: The operation to execute.
-    /// - Returns: The operation's result.
-    /// - Throws: A bounded-admission or logical-delivery error.
-    ///
-    /// Cancellation, timeout, and shutdown abandon logical delivery only.
-    /// An admitted worker remains the physical owner of the operation and any
-    /// late result until both have been destroyed.
+
     nonisolated(nonsending)
         public func run<T: ~Copyable>(
             timeout: Duration? = nil,
@@ -104,18 +89,6 @@ extension Kernel.Thread.Pool {
         return result
     }
 
-    /// Executes a throwing operation on a dedicated worker thread.
-    ///
-    /// - Parameters:
-    ///   - timeout: The total budget for admission and execution.
-    ///   - operation: The operation to execute.
-    /// - Returns: The operation's result.
-    /// - Throws: The left side for pool lifecycle failures and the right side
-    ///   for an operation failure.
-    ///
-    /// Cancellation, timeout, and shutdown abandon logical delivery only.
-    /// An admitted worker remains the physical owner of the operation and any
-    /// late result until both have been destroyed.
     nonisolated(nonsending)
         public func run<T: ~Copyable, E: Swift.Error>(
             timeout: Duration? = nil,
@@ -215,11 +188,6 @@ extension Kernel.Thread.Pool {
         }
     }
 
-    /// Schedules abandonment of one registered delivery at its deadline.
-    ///
-    /// The timer uses the standard task failure channel: cancellation aborts
-    /// the sleep and abandons timeout delivery. Callers cancel and join the
-    /// task through its nonthrowing `result`.
     private func deadline(
         after remaining: Duration,
         for id: ObjectIdentifier

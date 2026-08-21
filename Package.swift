@@ -12,14 +12,14 @@ let package = Package(
         .visionOS(.v27),
     ],
     products: [
-        // MARK: - Variants
+
         .library(name: "Thread Barrier", targets: ["Thread Barrier"]),
         .library(name: "Thread Gate", targets: ["Thread Gate"]),
         .library(name: "Thread Semaphore", targets: ["Thread Semaphore"]),
         .library(name: "Thread Worker", targets: ["Thread Worker"]),
         .library(name: "Thread Pool", targets: ["Thread Pool"]),
         .library(name: "Thread Actor", targets: ["Thread Actor"]),
-        // MARK: - Umbrella
+
         .library(name: "Threads", targets: ["Threads"]),
     ],
     dependencies: [
@@ -47,7 +47,7 @@ let package = Package(
         ),
     ],
     targets: [
-        // MARK: - Coordination variants
+
         .target(
             name: "Thread Barrier",
             dependencies: [
@@ -73,7 +73,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Dispatch
         .target(
             name: "Thread Pool",
             dependencies: [
@@ -98,7 +97,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Umbrella
         .target(
             name: "Threads",
             dependencies: [
@@ -111,7 +109,6 @@ let package = Package(
             ]
         ),
 
-        // MARK: - Tests
         .testTarget(
             name: "Thread Semaphore Tests",
             dependencies: [

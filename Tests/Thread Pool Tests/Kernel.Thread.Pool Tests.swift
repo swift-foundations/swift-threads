@@ -1,8 +1,3 @@
-//
-//  Kernel.Thread.Pool Tests.swift
-//  swift-threads
-//
-
 import Async_Semaphore_Primitives
 import Either_Primitives
 import Kernel_Test_Support

@@ -1,67 +1,5 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-kernel open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-kernel project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 extension Kernel.Thread {
-    /// A thread-blocking counting semaphore.
-    ///
-    /// Semaphore limits concurrent access to a resource by maintaining a count
-    /// of available permits. Threads acquire a permit before accessing the
-    /// resource and release it when done. When no permits are available,
-    /// acquiring threads block until a permit is released.
-    ///
-    /// ## Safety Invariant
-    ///
-    /// This type is `Sendable` by virtue of internal synchronization: the entire
-    /// `_state` struct (permit counts, waiter counts, metrics, lifecycle) is
-    /// protected by `Synchronizer.Blocking<2>` -- a single mutex paired with two
-    /// condition variables (`available` and `shutdown`). Every path -- acquire,
-    /// release, shutdown, wait, metrics snapshot -- serializes on the mutex and
-    /// signals/broadcasts the appropriate condition under the lock. The caller
-    /// MUST route every access through the documented public API; touching
-    /// `_state` outside the lock is undefined behaviour.
-    ///
-    /// ## Intended Use
-    ///
-    /// - Bounding concurrency over a shared resource at the kernel-thread
-    ///   layer (e.g., "no more than N in-flight requests", "at most K open
-    ///   file handles").
-    /// - Graceful shutdown with outstanding-permit draining via
-    ///   `shutdown.wait()`.
-    /// - Metrics-bearing coordination point where acquire/release/reject/
-    ///   timeout counters are observable.
-    ///
-    /// ## Non-Goals
-    ///
-    /// - Not an actor. Semaphore does not suspend Swift concurrency tasks;
-    ///   it blocks threads. For async permit acquisition use an actor or a
-    ///   Swift-concurrency-native primitive.
-    /// - Not a lock-free semaphore. Every acquire/release pays for mutex
-    ///   acquisition; the dual-condvar layout optimizes for condvar fan-out,
-    ///   not uncontended throughput.
-    /// - Not reentrant. A thread holding a permit and calling `acquire`
-    ///   again does not recursively succeed; it blocks.
-    ///
-    /// ## Usage
-    /// ```swift
-    /// let semaphore = Kernel.Thread.Semaphore(capacity: 3)
-    ///
-    /// // Scoped acquire/release
-    /// let result = try semaphore.run { expensiveWork() }
-    ///
-    /// // With timeout
-    /// let result = try semaphore.run.timeout(.seconds(5)) { work() }
-    ///
-    /// // Graceful shutdown
-    /// semaphore.shutdown.wait()
-    /// ```
+
     public final class Semaphore: @unchecked Sendable {
         @usableFromInline
         let sync: Synchronizer.Blocking<2>
@@ -69,13 +7,8 @@ extension Kernel.Thread {
         @usableFromInline
         var _state: State
 
-        /// The total number of permits managed by this semaphore.
         public let capacity: Int
 
-        /// Creates a semaphore with the given capacity.
-        ///
-        /// - Parameter capacity: The number of concurrent permits.
-        /// - Precondition: Capacity must be at least 1.
         public init(capacity: Int) {
             precondition(capacity >= 1, "Semaphore capacity must be at least 1")
             self.capacity = capacity
@@ -84,8 +17,6 @@ extension Kernel.Thread {
         }
     }
 }
-
-// MARK: - Acquire
 
 extension Kernel.Thread.Semaphore {
     @usableFromInline
@@ -186,8 +117,6 @@ extension Kernel.Thread.Semaphore {
     }
 }
 
-// MARK: - Release
-
 extension Kernel.Thread.Semaphore {
     @usableFromInline
     func _release() {
@@ -206,8 +135,6 @@ extension Kernel.Thread.Semaphore {
         perform(effect)
     }
 }
-
-// MARK: - Shutdown
 
 extension Kernel.Thread.Semaphore {
     @usableFromInline
@@ -244,8 +171,6 @@ extension Kernel.Thread.Semaphore {
     }
 }
 
-// MARK: - Completion Check
-
 extension Kernel.Thread.Semaphore {
     @usableFromInline
     func _close() -> Effect {
@@ -259,8 +184,6 @@ extension Kernel.Thread.Semaphore {
     }
 }
 
-// MARK: - Single Funnel
-
 extension Kernel.Thread.Semaphore {
     @inline(always)
     func perform(_ effect: Effect) {
@@ -269,22 +192,18 @@ extension Kernel.Thread.Semaphore {
             return
 
         case .signal(let condition):
-            // swift-linter:disable:next raw value access
-            // REASON: same-package implementation access converting the typed Condition case to its Synchronizer.Blocking condition index.
+
             sync.signal(condition: condition.rawValue)
 
         case .broadcast(let condition):
-            // swift-linter:disable:next raw value access
-            // REASON: same-package implementation access converting the typed Condition case to its Synchronizer.Blocking condition index.
+
             sync.broadcast(condition: condition.rawValue)
         }
     }
 }
 
-// MARK: - Metrics
-
 extension Kernel.Thread.Semaphore {
-    /// A snapshot of the semaphore's operational metrics.
+
     public var metrics: Metrics {
         sync.lock()
         defer { sync.unlock() }

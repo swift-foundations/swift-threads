@@ -1,20 +1,7 @@
-//
-//  Kernel.Thread.Pool.Lifecycle.swift
-//  swift-threads
-//
-
 internal import Synchronizer_Blocking
 
 extension Kernel.Thread.Pool {
-    /// Synchronized reservation and logical-delivery state for one pool.
-    ///
-    /// ## Safety Invariant
-    ///
-    /// The synchronizer exclusively protects open, count, and deliveries.
-    /// Count equals accepted calls that have not physically completed.
-    /// Deliveries contains only accepted calls whose logical requester has
-    /// not completed. Closing is monotonic. Every successful reservation is
-    /// released exactly once, and continuations are resumed after unlocking.
+
     final class Lifecycle: @unchecked Sendable {
         private let sync = Synchronizer.Blocking<1>()
         private let maximum: Int
@@ -30,7 +17,7 @@ extension Kernel.Thread.Pool {
 }
 
 extension Kernel.Thread.Pool.Lifecycle {
-    /// Reserves bounded capacity for one call.
+
     func reserve() throws(Kernel.Thread.Pool.Error) {
         let failure: Kernel.Thread.Pool.Error?
 
@@ -50,7 +37,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         }
     }
 
-    /// Registers one accepted requester's logical delivery.
     func register(
         _ id: ObjectIdentifier,
         continuation: CheckedContinuation<Kernel.Thread.Pool.Error?, Never>
@@ -66,7 +52,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         return true
     }
 
-    /// Establishes admission before shutdown can reject queued work.
     func admit(_ id: ObjectIdentifier) -> Bool {
         sync.lock()
         let admitted = open && deliveries[id] != nil
@@ -74,7 +59,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         return admitted
     }
 
-    /// Claims one requester's logical delivery.
     func resolve(
         _ id: ObjectIdentifier
     ) -> CheckedContinuation<Kernel.Thread.Pool.Error?, Never>? {
@@ -84,7 +68,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         return continuation
     }
 
-    /// Releases one accepted call after physical completion.
     func release() {
         sync.lock()
         count -= 1
@@ -97,7 +80,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         }
     }
 
-    /// Closes reservations and claims all unresolved deliveries.
     func close() -> [CheckedContinuation<Kernel.Thread.Pool.Error?, Never>] {
         sync.lock()
         open = false
@@ -107,7 +89,6 @@ extension Kernel.Thread.Pool.Lifecycle {
         return continuations
     }
 
-    /// Blocks until every accepted call has physically completed.
     func wait() {
         sync.lock()
         defer { sync.unlock() }

@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-kernel open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-kernel project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Kernel
 import Testing
 import Thread_Gate
@@ -49,7 +38,7 @@ extension Kernel.Thread.Semaphore {
                             releaseGate.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
                 let t2 = try Kernel.Thread.spawn {
@@ -59,7 +48,7 @@ extension Kernel.Thread.Semaphore {
                             releaseGate.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
                 let t3 = try Kernel.Thread.spawn {
@@ -69,7 +58,7 @@ extension Kernel.Thread.Semaphore {
                             releaseGate.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -136,7 +125,7 @@ extension Kernel.Thread.Semaphore {
                             allowRelease.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -150,7 +139,7 @@ extension Kernel.Thread.Semaphore {
                             secondAcquired.open()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -183,7 +172,7 @@ extension Kernel.Thread.Semaphore {
                             released.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -240,7 +229,7 @@ extension Kernel.Thread.Semaphore {
                             canRelease.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -278,7 +267,7 @@ extension Kernel.Thread.Semaphore {
                             holdingRelease.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -290,7 +279,7 @@ extension Kernel.Thread.Semaphore {
                     } catch .shutdown {
                         box.caught = true
                     } catch {
-                        // Other error
+
                     }
                     waiterDone.open()
                 }
@@ -330,7 +319,7 @@ extension Kernel.Thread.Semaphore {
                             holdingRelease.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -343,7 +332,7 @@ extension Kernel.Thread.Semaphore {
                     } catch .cancelled {
                         box.caught = true
                     } catch {
-                        // Other error
+
                     }
                     waiterDone.open()
                 }
@@ -395,7 +384,7 @@ extension Kernel.Thread.Semaphore {
                             holdingRelease.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
@@ -458,7 +447,7 @@ extension Kernel.Thread.Semaphore {
                             release.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
                 let t2 = try Kernel.Thread.spawn {
@@ -468,7 +457,7 @@ extension Kernel.Thread.Semaphore {
                             release.wait()
                         }
                     } catch {
-                        // Discarded: best-effort background acquisition in this test; shutdown errors are irrelevant to what's being asserted.
+
                     }
                 }
 
